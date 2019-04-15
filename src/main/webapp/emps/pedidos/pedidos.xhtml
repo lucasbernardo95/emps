@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:decorate xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	template="/emps/menuBarPrincipal.xhtml">
+
+
+	<h:form id="formPedidos">
+
+		<p:messages id="smsPedidos" closable="true" />
+
+		<p:dataTable id="tablePedido" var="pedido" value="#{pedidoBean.list}"
+			selectionMode="single" selection="#{pedidoBean.selected}"
+			rowKey="#{pedido.idPedido}" paginator="true" rows="12"
+			paginatorPosition="top">
+
+			<p:ajax event="rowSelect" listener="#{pedidoBean.itemSelecionado}"
+				update="formPedidos" />
+
+			<p:ajax event="rowUnselect" listener="#{pedidoBean.selecaoRemovida}"
+				update="formPedidos" />
+
+			<p:column style="width:16px">
+				<p:rowToggler />
+			</p:column>
+
+			<p:column headerText="Nome">
+				<h:outputText value="#{pedido.nomeUsuario}" />
+			</p:column>
+
+			<p:column headerText="Descrição">
+				<h:outputText value="#{pedido.descricao}" />
+			</p:column>
+
+			<p:rowExpansion>
+				<p:outputPanel>
+					<p:panelGrid columns="2"
+						columnClasses="label,value">
+
+						<h:outputText value="Nome" />
+						<h:outputText value="#{pedido.nomeUsuario}" />
+
+						<h:outputText value="Telefone" />
+						<h:outputText value="#{pedido.telefone}" />
+
+						<h:outputText value="Hora" />
+						<h:outputText value="#{pedido.hora}" />
+
+						<h:outputText value="Data" />
+						<h:outputText value="#{pedido.data}" />
+
+						<h:outputText value="Descrição" />
+						<h:outputText value="#{pedido.descricao}" />
+					</p:panelGrid>
+				</p:outputPanel>
+			</p:rowExpansion>
+
+			<f:facet name="footer">
+				<p:commandButton process="tablePedido" update="formPedidos"
+					icon="fa fa-trash-o" title="Deletar" action="#{pedidoBean.delete}">
+					<p:confirm header="Confirmation" message="Deseja apagar??"
+						icon="fa fa-trash-o" />
+				</p:commandButton>
+			</f:facet>
+
+
+		</p:dataTable>
+
+
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+			<p:commandButton value="Sim" type="button"
+				styleClass="ui-confirmdialog-yes" icon="pi pi-check"
+				update="formPedidos" />
+			<p:commandButton value="Não" type="button"
+				styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+		</p:confirmDialog>
+
+
+	</h:form>
+
+
+</ui:decorate>

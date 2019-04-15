@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<title>Eduardo Motos</title>
+	<style type="text/css">
+body {
+	background-color: black;
+}
+</style>
+</h:head>
+<body>
+	<h:form id="fprincipal">
+		<p:menubar>
+			<p:menuitem value="Solicitar serviço" url="/index.xhtml"
+				icon="fa fa-location-arrow"></p:menuitem>
+			<p:menuitem value="Clientes"
+				url="/emps/clientes/clientes.xhtml" />
+			<p:menuitem value="Pedidos" url="/emps/pedidos/pedidos.xhtml" />
+			<p:menuitem value="Produtos" url="/emps/produtos/produtos.xhtml" />
+			<p:menuitem value="Vendas" url="/emps/vendas/vendas.xhtml" />
+		</p:menubar>
+
+		<p:dock position="bottom" >
+		    <p:menuitem value="Email" icon="/emps/images/email.png" url="https://mail.google.com/mail/u/0/#inbox"/>
+		    <p:menuitem value="Vendas" icon="/emps/images/portfolio.png" url="/emps/vendas/vendas.xhtml"/>
+		    <p:menuitem value="Produtos" icon="/emps/images/estoque.png" url="/emps/produtos/produtos.xhtml"/>
+		    <p:menuitem value="WhatsApp" icon="/emps/images/whatsapp.png" url="https://web.whatsapp.com"/>
+		    <p:menuitem value="Messeger" icon="/emps/images/messenger.png" url="https://www.messenger.com"/>
+		    <p:menuitem value="Perfil" icon="/emps/images/man.png" url="#"/>
+		</p:dock>
+	</h:form>
+	<hr />
+
+
+	<ui:insert></ui:insert>
+
+</body>
+</html>
