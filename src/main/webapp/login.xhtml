@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Login</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</h:head>
+<h:body>
+
+	<div class="login">
+		<h1>Login</h1>
+		<font color="red"> <p:outputLabel
+				value="${SPRING_SECURITY_LAST_EXCEPTION.message}" />
+		</font>
+		<h:form prependId="false">
+
+
+			<p:inputText type="text" name="username" id="username"
+				placeholder="User name" />
+
+			<p:inputText type="password" name="password" id="password"
+				placeholder="Password" />
+
+			<p:commandButton type="submit" ajax="false" value="Login"
+				class="btn btn-primary btn-block btn-large" />
+
+		</h:form>
+
+	</div>
+
+
+</h:body>
+
+</html>

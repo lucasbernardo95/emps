@@ -10,13 +10,14 @@ import org.primefaces.event.UnselectEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.annotation.SessionScope;
 
+import com.emps.controller.interfaces.CrudBean;
+import com.emps.controller.interfaces.MessageContext;
 import com.emps.model.Produto;
 import com.emps.repository.ProdutoRepository;
-import com.emps.util.MessageUtil;
 
 @Named
 @SessionScope
-public class ProdutoBean implements CrudBean {
+public class ProdutoBean implements CrudBean, MessageContext {
 
 	private Produto entity, selected;
 	private List<Produto> list, filtred;
@@ -42,14 +43,8 @@ public class ProdutoBean implements CrudBean {
 
 	@Override
 	public void save() {
-		if (isValidField(entity.getNome()) && entity.getQuantidadeEstoque() <= 0 && entity.getValorCompra() <= 0
-				&& entity.getValorVenda() <= 0) {
-			MessageUtil.MensagemErro("Os campos nome, estoque, valor de compra e revenda são obrigatórios.");
-			return;
-		}
-
 		repository.save(entity);
-		MessageUtil.MensagemSucesso("Salvo com sucesso.");
+		MensagemSucesso("Salvo com sucesso.");
 		novo();
 		list();
 	}
@@ -57,7 +52,7 @@ public class ProdutoBean implements CrudBean {
 	@Override
 	public void delete() {
 		if (entity == null) {
-			MessageUtil.MensagemErro("Nenhum produto foi selecionado.");
+			MensagemErro("Nenhum produto foi selecionado.");
 			return;
 		}
 		repository.delete(entity);
@@ -70,7 +65,7 @@ public class ProdutoBean implements CrudBean {
 		list = repository.findAll();
 
 		if (list == null) {
-			MessageUtil.MensagemErro("Nenhum produto encontrado.");
+			MensagemErro("Nenhum produto encontrado.");
 		}
 	}
 	
@@ -78,9 +73,7 @@ public class ProdutoBean implements CrudBean {
 		entity = (Produto) event.getObject();
 	}
 	
-	public void selecaoRemovida(UnselectEvent event) {
-		
-	}
+	public void selecaoRemovida(UnselectEvent event) {}
 
 	public Produto getEntity() {
 		return entity;

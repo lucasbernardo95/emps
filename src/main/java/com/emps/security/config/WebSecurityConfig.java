@@ -3,7 +3,6 @@ package com.emps.security.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -24,12 +23,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	// Define as URLs que precisam de autenticação para ser acessadas
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests().antMatchers("/index.xhtml").permitAll() //página pública
-			.anyRequest().authenticated() //define o formulário padrão do security e se tiver autenticado redireciona para /emps/home
-			.antMatchers("/emps/").authenticated()
-			.and().formLogin().permitAll()//o que estiver dentro /emps/ precisa estar autenticado
-			.defaultSuccessUrl("/emps/vendas/vendas.xhtml")
-	        .and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"));// /logout encerra a cessão
+		//Indica que os recursos indicados de o index podem ser acessados por qualquer um sem autenticação
+		http.csrf().disable().authorizeRequests().antMatchers("/javax.faces.resource/**", "/index.xhtml").permitAll() //página pública
+			.anyRequest().authenticated() //qualquer outro link necessita de autenticação			
+			//login
+			//qualquer um pode acessar a página de login
+			.and().formLogin().loginPage("/login.xhtml").permitAll()
+			//se houver falha no login, envia o parâmetro erro=true
+			//.failureUrl("/login.xhtml?error=true")
+			//caso ocorra tudo bem, redireciona para o link descrito
+			.defaultSuccessUrl("/restrito/vendas/vendas.xhtml")
+			
+			//logout
+	        .and().logout().logoutUrl("/logout") //Uri de requisição para logout
+	        .logoutSuccessUrl("/login.xhtml");//página para onde será redirecionado quando a sessão for invalidada
 	}
 
 	// define como vai ser feita a autenticação
@@ -42,7 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	// styles.css e etc
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/");
+		web.ignoring().antMatchers("/", "/css/**");
 	}
 
 	@Bean

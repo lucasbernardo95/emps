@@ -11,13 +11,14 @@ import org.primefaces.event.UnselectEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.annotation.SessionScope;
 
+import com.emps.controller.interfaces.CrudBean;
+import com.emps.controller.interfaces.MessageContext;
 import com.emps.model.Cliente;
 import com.emps.repository.ClienteRepository;
-import com.emps.util.MessageUtil;
 
 @Named
 @SessionScope
-public class ClienteBean implements CrudBean {
+public class ClienteBean implements CrudBean, MessageContext {
 
 
 	@Autowired
@@ -25,6 +26,8 @@ public class ClienteBean implements CrudBean {
 	
 	private Cliente entity, selected;
 	private List<Cliente> list, filtred;
+	private double valor;
+	private double valorDebito;
 	
 	public ClienteBean() {}
 	
@@ -43,14 +46,8 @@ public class ClienteBean implements CrudBean {
 
 	@Override
 	public void save() {
-		
-		if(isValidField(entity.getNome()) && isValidField(entity.getTelefone())) {
-			MessageUtil.MensagemErro("Os campos nome e telefone são obrigatórios.");
-			return;
-		}
-		
 		repository.save(entity);
-		MessageUtil.MensagemSucesso("Salvo com sucesso.");
+		MensagemSucesso("Salvo com sucesso.");
 		entity = new Cliente();
 		list();
 	}
@@ -58,7 +55,7 @@ public class ClienteBean implements CrudBean {
 	@Override
 	public void delete() {
 		if (entity == null) {
-			MessageUtil.MensagemErro("Nenhum cliente foi selecionado.");
+			MensagemErro("Nenhum cliente foi selecionado.");
 			return;
 		}
 		repository.delete(entity);
@@ -71,17 +68,31 @@ public class ClienteBean implements CrudBean {
 		list = repository.findAll();
 
 		if (list == null) {
-			MessageUtil.MensagemErro("Nenhum cliente encontrado.");
+			MensagemErro("Nenhum cliente encontrado.");
 		}
+	}
+
+	//reduz o saldo devido pelo cliente selecionado na tabela a 0 e salva
+//	public void quitarDivida(){
+//		entity.setDebito(0.0);
+//		save();
+//	}
+
+	//
+	public void quitarDebito(){
+		if(valorDebito > 0 && valorDebito <= entity.getDebito() && entity.getDebito() > 0){
+			entity.setDebito( entity.getDebito() - valorDebito);
+			save();
+			MensagemSucesso("Sucesso!","Débito modificado.");
+			return;
+		}MensagemPerigo("Informe um valor válido.");
 	}
 	
 	public void itemSelecionado(SelectEvent event) {
 		entity = (Cliente) event.getObject();
 	}
 	
-	public void selecaoRemovida(UnselectEvent event) {
-		
-	}
+	public void selecaoRemovida(UnselectEvent event) {}
 
 	public Cliente getEntity() {
 		return entity;
@@ -115,4 +126,19 @@ public class ClienteBean implements CrudBean {
 		this.selected = selected;
 	}
 
+	public double getValor() {
+		return valor;
+	}
+
+	public void setValor(double valor) {
+		this.valor = valor;
+	}
+
+	public double getValorDebito() {
+		return valorDebito;
+	}
+
+	public void setValorDebito(double valorDebito) {
+		this.valorDebito = valorDebito;
+	}
 }

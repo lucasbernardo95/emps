@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "Clientes")
@@ -20,19 +22,37 @@ public class Cliente implements Serializable {
     @Column(name = "idCliente")
     private long idCliente;
 
-    @Column(nullable = false)
+    @NotEmpty(message = "O nome do cliente não pode ser nulo.")
+    @Size(min = 3, max = 25, message = "O nome deve conter entre 3 e 25 caracteres.") 
     private String nome;
-    
+
+    @NotEmpty(message = "O CPF não pode ser nulo.")
+    @Size(min = 14, max = 14, message = "O CPF deve conter 11 caracteres.") 
     @Column(unique = true)
     private String cpf;
     
+    @Column
     private double debito;
+    
+    @Column
     private String observacao;
+    
+    @Column
     private String telefone;
+    
+    @Column
     private String email;
+    
+    @Column
     private String cidade;
+    
+    @Column
     private String endereco;
+    
+    @Column
     private String bairro;
+    
+    @Column
     private Integer numeroCasa;
 
     public Cliente() {

@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:decorate xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	template="/restrito/menuBarPrincipal.xhtml">
+
+	<h:form id="formProduto">
+		<p:growl id="message" showDetail="true" />
+
+		<p:dataTable id="tabelaProduto" var="objeto"
+			value="#{produtoBean.list}" selectionMode="single"
+			selection="#{produtoBean.selected}" rowKey="#{objeto.idProduto}"
+			paginator="true" rows="12" paginatorPosition="top"
+			emptyMessage="Nenhum produto encontrado"
+			filteredValue="#{produtoBean.filtred}">
+
+			<p:ajax event="rowSelect" listener="#{produtoBean.itemSelecionado}"
+				update="formProduto" />
+			<p:ajax event="rowUnselect" listener="#{produtoBean.selecaoRemovida}"
+				update="formProduto" />
+
+			<p:column style="width:16px">
+				<p:rowToggler />
+			</p:column>
+
+			<p:column filterBy="#{objeto.nome}" headerText="Nome"
+				filterMatchMode="contains">
+				<h:outputText value="#{objeto.nome}" />
+			</p:column>
+
+			<p:column headerText="Valor" sortBy="#{objeto.valorVenda}">
+				<h:outputText value="#{objeto.valorVenda} R$" />
+			</p:column>
+
+			<p:column filterBy="#{objeto.quantidadeEstoque}" headerText="Estoque"
+				sortBy="#{objeto.quantidadeEstoque}" filterMatchMode="contains">
+				<h:outputText value="#{objeto.quantidadeEstoque}" />
+			</p:column>
+
+			<p:rowExpansion>
+				<p:panelGrid columns="2">
+					<h:outputText value="Nome" />
+					<p:outputLabel value="#{objeto.nome}" />
+
+					<h:outputText value="Revenda" />
+					<p:outputLabel value="#{objeto.valorVenda} R$" />
+
+					<h:outputText value="Valor da compra" />
+					<p:outputLabel value="#{objeto.valorCompra} R$" />
+
+					<h:outputText value="Estoque" />
+					<p:outputLabel value="#{objeto.quantidadeEstoque}" />
+
+					<h:outputText value="Descrição" />
+					<p:outputLabel value="#{objeto.descricao}" />
+				</p:panelGrid>
+			</p:rowExpansion>
+
+			<f:facet name="footer">
+				<p:commandButton process="@this" update="formProduto" title="Novo"
+					actionListener="#{produtoBean.novo()}" icon="fa fa-plus"
+					oncomplete="PF('diagCadastrar').show()" />
+			</f:facet>
+
+			<f:facet name="footer">
+				<p:commandButton update="formProduto" title="Alterar"
+					disabled="#{empty produtoBean.entity.nome}"
+					icon="fa fa-fw fa-edit" oncomplete="PF('diagCadastrar').show()"></p:commandButton>
+			</f:facet>
+
+			<f:facet name="footer">
+				<p:commandButton process="@this" update="formProduto"
+					disabled="#{empty produtoBean.entity.nome}" icon="fa fa-trash-o"
+					title="Deletar" action="#{pedidoBean.delete}">
+					<p:confirm header="Confirmation" message="Deseja apagar??"
+						icon="fa fa-trash-o" />
+				</p:commandButton>
+			</f:facet>
+
+		</p:dataTable>
+
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+			<p:commandButton value="Sim" type="button"
+				styleClass="ui-confirmdialog-yes" icon="pi pi-check"
+				update="formProduto" />
+			<p:commandButton value="Não" type="button"
+				styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+		</p:confirmDialog>
+
+		<!--  Diálogo para criar e salvar um novo produto -->
+		<p:dialog header="Salvar" id="diagCadastrar" widgetVar="diagCadastrar"
+			height="100%" resizable="false">
+			<p:panelGrid columns="4">
+
+				<h:outputText value="Nome" />
+				<p:inputText value="#{produtoBean.entity.nome}" />
+
+
+				<h:outputText value="Revenda" />
+				<p:inputNumber value="#{produtoBean.entity.valorVenda}"
+					decimalPlaces="2" minValue="0" decimalSeparator="."
+					thousandSeparator="," />
+
+				<h:outputText value="Valor da compra" />
+				<p:inputNumber value="#{produtoBean.entity.valorCompra}"
+					decimalPlaces="2" minValue="0" decimalSeparator="."
+					thousandSeparator="," />
+
+				<h:outputText value="Estoque" />
+				<p:inputNumber value="#{produtoBean.entity.quantidadeEstoque}"
+					decimalPlaces="0" minValue="1" maxValue="10000" />
+
+				<p:outputLabel value="Anotações" />
+				<p:inputTextarea value="#{produtoBean.entity.descricao}" rows="2"
+					cols="23" counter="disp" maxlength="256"
+					counterTemplate="{0} caracteres." autoResize="true" />
+				<p:outputLabel id="disp" />
+
+				<p:commandButton value="Salvar" action="#{produtoBean.save}"
+					update="formProduto " oncomplete="PF('diagCadastrar').hide();" />
+
+			</p:panelGrid>
+		</p:dialog>
+
+	</h:form>
+
+
+</ui:decorate>

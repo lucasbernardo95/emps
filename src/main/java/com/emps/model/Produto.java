@@ -1,13 +1,18 @@
 package com.emps.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.Range;
 
 @Entity
 @Table(name = "Produtos")
@@ -20,19 +25,24 @@ public class Produto implements Serializable {
     @Column(name = "idProduto")
     private long idProduto;
 
+    @NotEmpty(message = "O nome não pode ser nulo.")
+    @Size(min = 3, max = 30, message = "O nome deve conter entre 3 e 30 caracteres.") 
     private String nome;
     
+    @NotEmpty(message = "Informe a descrição do produto")
     private String descricao;
     
-    @Column(nullable = false)
+    @NotNull(message = "O campo valor de revenda é obrigatório")
     private double valorVenda;
     
-    @Column(nullable = false)
+    @NotNull(message = "O campo valor da compra é obrigatório")
+    @Range(min=1, message="O valor da compra não pode ser menor que 0")
     private double valorCompra;
     
-    @Column(nullable = false)
+    @NotNull(message = "Informe a quantidade em estoque do produto")
     private int quantidadeEstoque;
     
+    //está variávei só é usada no momento em que o produto está sendo adicionado ou removido do carrinho, mas não é salva na tabela produto
     private int quantidadeVenda;
 
     public Produto() {

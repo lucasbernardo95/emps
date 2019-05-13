@@ -6,12 +6,11 @@ import javax.inject.Named;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.emps.model.User;
+import com.emps.controller.interfaces.MessageContext;
 import com.emps.repository.UserRepository;
-import com.emps.util.SessionUtil;
 
 @Named
-public class UserBean implements Serializable {
+public class UserBean implements Serializable, MessageContext {
 	
 	
 	@Autowired

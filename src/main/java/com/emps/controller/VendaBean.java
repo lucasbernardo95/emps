@@ -10,19 +10,20 @@ import javax.faces.model.SelectItemGroup;
 import javax.inject.Named;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.context.annotation.ApplicationScope;
 
+import com.emps.controller.interfaces.CrudBean;
+import com.emps.controller.interfaces.MessageContext;
 import com.emps.model.Cliente;
 import com.emps.model.Produto;
 import com.emps.model.Venda;
 import com.emps.repository.ClienteRepository;
 import com.emps.repository.ProdutoRepository;
 import com.emps.repository.VendaRepository;
-import com.emps.util.MessageUtil;
 
 @Named
-@SessionScope
-public class VendaBean implements CrudBean {
+@ApplicationScope
+public class VendaBean implements CrudBean, MessageContext {
 
 	@Autowired
 	private VendaRepository repository;
@@ -43,6 +44,7 @@ public class VendaBean implements CrudBean {
 	private List<Produto> listProdutos, produtosFiltrados, carrinho;
 	private Produto produtoSelecionado;
 	private int quantidade;
+	private boolean menuVenda;
 
 	public VendaBean() {
 	}
@@ -66,6 +68,8 @@ public class VendaBean implements CrudBean {
 		vendaNegociada = new Venda();
 		
 		carregaFormas();
+		menuVenda = false;//indica que o menu do carrinho (venda) ficará oculto
+		formaSelecionada = null;
 	}
 	
 	private void carregaFormas() {
@@ -94,6 +98,9 @@ public class VendaBean implements CrudBean {
 		carrinho = new ArrayList<Produto>();
 		vendaNegociada = new Venda();
 		clienteSelecionado = null;
+		//oculta o menu do carrinho
+		menuVenda = false;
+		formaSelecionada = null;
 	}
 	
 	/**
@@ -103,8 +110,8 @@ public class VendaBean implements CrudBean {
 	public void validaCompra() {
 		String detalhe = "";
 		for (Produto produto : carrinho) {
-			//calcula o total
-			vendaNegociada.setTotal( vendaNegociada.getTotal() + (produto.getValorVenda() * produto.getQuantidadeVenda() ) );
+			//calcula o total (é calculado sempre que adicionar um novo produto ao carrinho)
+			//vendaNegociada.setTotal( vendaNegociada.getTotal() + (produto.getValorVenda() * produto.getQuantidadeVenda() ) );
 			
 			detalhe += produto.getNome() + "\nQtd: " + produto.getQuantidadeVenda() + "x\nValor por unidade: " +produto.getValorVenda()+ "R$\nValor final: " + (produto.getValorVenda() * produto.getQuantidadeVenda())+"R$.\n";
 			//zera o valor da quantidade vendida do produto para evitar bugs em vendas futuras
@@ -130,7 +137,9 @@ public class VendaBean implements CrudBean {
 		vendaNegociada.setDataVenda(new Date());
 		
 		
-		//se o tipo de pagamento for parcelado, colo
+		//se o tipo de pagamento for parcelado, adiciona o total da venda como débito do cliente
+		clienteSelecionado.setDebito( clienteSelecionado.getDebito() + vendaNegociada.getTotal());
+
 		//adiciona o comprador ao objeto venda
 		List<Cliente> compradores = new ArrayList<Cliente>();
 		compradores.add(clienteSelecionado);
@@ -139,7 +148,6 @@ public class VendaBean implements CrudBean {
 		//finaliza a compra
 		save();
 		init();
-		
 	}
 	
 	private String verificaParcelasPagamento() {
@@ -213,7 +221,7 @@ public class VendaBean implements CrudBean {
 				Produto validador = carrinho.get(index);
 				//se o valor a ser incrementado for maior que a quantidade em estoque, informa o erro
 				if ( (validador.getQuantidadeVenda() + quantidade) > produto.getQuantidadeEstoque()) {
-					MessageUtil.MensagemPerigo("Estoque baixo! Quantidade disponível: " + produto.getQuantidadeEstoque());
+					MensagemPerigo("Estoque baixo! Quantidade disponível: " + produto.getQuantidadeEstoque());
 					return;
 				} else {
 					produto.setQuantidadeEstoque( produto.getQuantidadeEstoque() - quantidade );
@@ -222,15 +230,19 @@ public class VendaBean implements CrudBean {
 			}
 			quantidade = 1;
 			//se ocorreu tudo corretamente, informa uma mensagem na tela do usuário
-			MessageUtil.MensagemSucesso(produto.getNome() + " foi inserido no carrinho!");
+			MensagemSucesso(produto.getNome() + " foi inserido no carrinho!");
+
+			//calcula o valor total atual da venda
+			vendaNegociada.setTotal( vendaNegociada.getTotal() + (produto.getValorVenda() * produto.getQuantidadeVenda() ) );
 			return;
 		} else
-			MessageUtil.MensagemErro("Estoque insuficiente.");
+			MensagemErro("Estoque insuficiente.");
 		quantidade = 1;
 	}
 
 	public void removeProduto(Produto produto) {
-		if ( quantidade > 0) {
+		System.out.println("total: " + vendaNegociada.getTotal());
+		if ( quantidade > 0 && quantidade <= produto.getQuantidadeVenda()) {
 			if( quantidade == produto.getQuantidadeVenda()) {
 				//repõe a quantidade removida do estoque
 				produto.setQuantidadeEstoque( produto.getQuantidadeEstoque() + quantidade );
@@ -242,16 +254,22 @@ public class VendaBean implements CrudBean {
 					carrinho.remove(produto);
 				}
 			}
-			
-		}quantidade = 1;
+			//atualiza o valor total atual da venda subtraindo o valor do produto * quantidade removida do carrinho
+			vendaNegociada.setTotal( vendaNegociada.getTotal() - (produto.getValorVenda() * quantidade ) );
+			return;
+		}
+		//caso seja informada uma quantidade inválida
+		MensagemPerigo("Quantidade inválida!", "Verifique a quantidade informada e tente novamente.");
+		quantidade = 1;
+		System.out.println("total: " + vendaNegociada.getTotal() + " subtraído: " + (produto.getValorVenda() * quantidade));
 	}
 
 	public void addComprador(Cliente comprador) {
-		MessageUtil.MensagemSucesso(clienteSelecionado.getNome() + " foi adicionado como comprador!");
+		MensagemSucesso(clienteSelecionado.getNome() + " foi adicionado como comprador!");
 	}
 
 	public void removeComprador(Cliente comprador) {
-		MessageUtil.MensagemSucesso(comprador.getNome() + " foi removido da compra.");
+		MensagemSucesso(comprador.getNome() + " foi removido da compra.");
 		clienteSelecionado = null;
 	}
 
@@ -375,4 +393,11 @@ public class VendaBean implements CrudBean {
 		this.formaSelecionada = formaSelecionada;
 	}
 
+	public boolean isMenuVenda() {
+		return menuVenda;
+	}
+
+	public void setMenuVenda(boolean menuVenda) {
+		this.menuVenda = menuVenda;
+	}
 }

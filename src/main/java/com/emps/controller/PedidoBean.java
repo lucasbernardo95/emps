@@ -15,13 +15,14 @@ import org.primefaces.event.UnselectEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.annotation.RequestScope;
 
+import com.emps.controller.interfaces.CrudBean;
+import com.emps.controller.interfaces.MessageContext;
 import com.emps.model.Pedido;
 import com.emps.repository.PedidoRepository;
-import com.emps.util.MessageUtil;
 
 @Named
 @RequestScope
-public class PedidoBean implements Serializable, CrudBean {
+public class PedidoBean implements Serializable, CrudBean, MessageContext {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,26 +37,20 @@ public class PedidoBean implements Serializable, CrudBean {
 
 	@Override
 	public void save() {
-		if (isValidField(entity.getDescricao()) && isValidField(entity.getTelefone())
-				&& isValidField(entity.getNomeUsuario())) {
-			MessageUtil.MensagemErro("Por favor, preencha todos os campos corretamente.");
-			return;
-		}
-
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 		entity.setHora(dateFormat.format(new Date()));
 
 		entity.setData(new Date());
 
 		repository.save(entity);
-		MessageUtil.MensagemSucesso("Pedido realizado com sucesso.");
+		MensagemSucesso("Pedido realizado com sucesso.");
 		entity = new Pedido();
 	}
 
 	@Override
 	public void delete() {
 		if (entity == null) {
-			MessageUtil.MensagemErro("Nenhum pedido foi selecionado.");
+			MensagemErro("Nenhum pedido foi selecionado.");
 			return;
 		}
 		repository.delete(entity);
@@ -67,7 +62,7 @@ public class PedidoBean implements Serializable, CrudBean {
 		list = repository.findAll();
 
 		if (list == null) {
-			MessageUtil.MensagemPerigo("Nenhum pedido encontrado.");
+			MensagemPerigo("Nenhum pedido encontrado.");
 		}
 	}
 	

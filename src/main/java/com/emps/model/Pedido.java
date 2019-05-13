@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -28,13 +29,16 @@ public class Pedido implements Serializable {
     @Column(name = "idPedido")
     private long idPedido;
     
-    @Column(nullable = false)
+    @Column
+    @NotEmpty(message = "Por favor, informe seu nome!")
     private String nomeUsuario;
     
-    @Column(nullable = false)
+    @Column
+    @NotEmpty(message = "É importante informar seu telefone para que se possa entrar em contato, caso necessário.")
     private String telefone;
     
     @Column
+    @NotEmpty(message = "Descreva o problema apresentado pelo seu veículo para o qual deseja solicitar um serviço.")
     private String descricao;
     
     @Column

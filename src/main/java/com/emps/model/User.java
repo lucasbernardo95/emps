@@ -5,6 +5,8 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -17,7 +19,12 @@ public class User implements UserDetails, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idUser")
+    private long id;
+	
+	@Column(unique = true)
     private String login;
     
     @Column(nullable = false)
@@ -47,10 +54,19 @@ public class User implements UserDetails, Serializable {
 		this.senha = senha;
 	}
 
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((login == null) ? 0 : login.hashCode());
 		result = prime * result + ((senha == null) ? 0 : senha.hashCode());
 		return result;
@@ -65,6 +81,8 @@ public class User implements UserDetails, Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
+		if (id != other.id)
+			return false;
 		if (login == null) {
 			if (other.login != null)
 				return false;
@@ -76,12 +94,6 @@ public class User implements UserDetails, Serializable {
 		} else if (!senha.equals(other.senha))
 			return false;
 		return true;
-	}
-
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -118,6 +130,12 @@ public class User implements UserDetails, Serializable {
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

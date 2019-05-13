@@ -1,0 +1,298 @@
+<ui:decorate xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	template="../menuBarPrincipal.xhtml">
+
+	<h:form id="formVendas">
+		<p:growl>
+			<p:autoUpdate />
+		</p:growl>
+
+		<!-- Menu do carrinho lateral -->
+		<p:stack icon="/restrito/images/stack.png" expanded="true" rendered="#{vendaBean.menuVenda eq true}">
+
+			<p:menuitem oncomplete="PF('carrinhoList').show()" value="Carrinho" icon="/restrito/images/cart.png" update="formVendas" />
+			<p:menuitem oncomplete="PF('protudoList').show()" value="Produtos" update="formVendas tabelaProduto" icon="/restrito/images/estoque.png"/>
+			<p:menuitem oncomplete="PF('clienteList').show()" value="Clientes" update="formVendas tabelaCliente" icon="/restrito/images/cliente.png" />
+
+		</p:stack>
+
+		<p:dataTable id="tabelaVendas" var="objeto" value="#{vendaBean.list}"
+			paginator="true" rows="12" paginatorPosition="top"
+			emptyMessage="Nenhuma venda realizada até o momento"
+			filteredValue="#{vendaBean.filtred}" scrollable="true"
+			scrollHeight="300" style="width:83%">
+
+			<f:facet name="header">Histórico de vendas</f:facet>
+			<p:columnGroup type="header">
+				<p:row>
+					<p:column rowspan="2" headerText="Data" style="width:120px" sortBy="#{objeto.dataVenda}" />
+					<p:column colspan="2" headerText="Detalhes"/>
+				</p:row>
+				<p:row>
+					<p:column headerText="Cliente" />
+					<p:column headerText="Produtos" />
+				</p:row>
+			</p:columnGroup>
+
+			<p:subTable var="cliente" value="#{objeto.compradores}">
+
+				<p:column >
+					<h:outputText value="#{objeto.dataVenda}" />
+				</p:column>
+				<p:column>
+					<h:outputText value="#{cliente.nome}" />
+				</p:column>
+
+				<p:column>
+					<h:outputText value="#{objeto.detalheVenda}" />
+				</p:column>
+
+				<p:columnGroup type="footer">
+					<p:row>
+						<p:column footerText="" />
+						<p:column footerText="Total: " style="text-align:right" />
+						<p:column footerText="#{objeto.total} R$" />
+					</p:row>
+				</p:columnGroup>
+			</p:subTable>
+		</p:dataTable>
+
+
+		<p:dialog header="Lista de clientes" id="clienteList"
+			widgetVar="clienteList" height="100%" resizable="false"
+			scrollable="true" scrollHeight="150">
+
+			<p:dataTable id="tabelaCliente" var="objeto"
+				value="#{vendaBean.listClientes}" rows="8" paginator="true">
+
+				<p:column style="width:16px">
+					<p:rowToggler />
+				</p:column>
+
+				<p:column filterBy="#{objeto.nome}" headerText="Nome"
+					filterMatchMode="contains">
+					<h:outputText value="#{objeto.nome}" />
+				</p:column>
+
+				<p:column style="width:50px">
+					<p:commandButton icon="fa fa-user-plus"
+						action="#{vendaBean.addComprador(objeto)}"
+						disabled="#{not empty vendaBean.clienteSelecionado}"
+						update="tabelaCliente">
+						<p:ajax process="@this" />
+						<f:setPropertyActionListener value="#{objeto}"
+							target="#{vendaBean.clienteSelecionado}" />
+					</p:commandButton>
+				</p:column>
+
+				<p:column style="width:50px">
+					<p:commandButton icon="fa fa-user-times"
+						action="#{vendaBean.removeComprador(objeto)}"
+						disabled="#{empty vendaBean.clienteSelecionado}"
+						update="tabelaCliente">
+						<p:ajax process="@this" />
+						<f:setPropertyActionListener value="#{null}"
+							target="#{vendaBean.clienteSelecionado}" />
+					</p:commandButton>
+				</p:column>
+
+				<p:rowExpansion>
+					<p:panelGrid columns="2">
+
+						<h:outputText value="Débito" />
+						<p:outputLabel value="#{objeto.debito}" />
+
+						<h:outputText for="cpfDetalhe" value="CPF" />
+						<p:outputLabel id="cpfDetalhe" mask="999-999-999-99"
+							value="#{objeto.cpf}" />
+
+						<h:outputText value="E-mail" />
+						<p:outputLabel value="#{objeto.email}" />
+
+						<h:outputText for="foneDetalhe" value="Telefone" />
+						<p:outputLabel id="foneDetalhe" mask="(99) 9 9999-9999"
+							value="#{objeto.telefone}" />
+
+						<h:outputText value="Endereço" />
+						<p:outputLabel value="#{objeto.endereco}" />
+
+						<h:outputText value="Cidade" />
+						<p:outputLabel value="#{objeto.cidade}" />
+
+						<h:outputText value="Bairro" />
+						<p:outputLabel value="#{objeto.bairro}" />
+
+						<h:outputText value="Nº" />
+						<p:outputLabel value="#{objeto.numeroCasa}" />
+
+						<p:outputLabel value="Anotações" />
+						<p:outputLabel value="#{objeto.observacao}" />
+
+					</p:panelGrid>
+				</p:rowExpansion>
+
+
+			</p:dataTable>
+		</p:dialog>
+
+		<p:dialog header="Lista de produtos" id="protudoList"
+			widgetVar="protudoList" height="100%" resizable="false"
+			scrollable="true" scrollHeight="150">
+
+			<p:dataTable id="tabelaProduto" var="objeto"
+				value="#{vendaBean.listProdutos}" rows="8" paginator="true">
+
+				<p:column style="width:16px">
+					<p:rowToggler />
+				</p:column>
+
+				<p:column filterBy="#{objeto.nome}" headerText="Nome"
+					filterMatchMode="contains">
+					<h:outputText value="#{objeto.nome}" />
+				</p:column>
+
+				<p:column style="width:100px">
+					<p:spinner id="quantidadeProduto2" value="#{vendaBean.quantidade}"
+						min="1" max="10000">
+						<p:ajax process="@this" />
+					</p:spinner>
+				</p:column>
+
+				<p:column style="width:50px">
+					<p:commandButton icon="fa fa-cart-plus"
+						actionListener="#{vendaBean.addProduto(objeto)}"
+						disabled="#{objeto.quantidadeEstoque eq 0}" update="tabelaProduto"
+						process="@this">
+						<f:setPropertyActionListener value="#{objeto}"
+							target="#{vendaBean.produtoSelecionado}" />
+					</p:commandButton>
+				</p:column>
+
+				<p:rowExpansion>
+					<p:panelGrid columns="2">
+
+						<h:outputText value="Revenda" />
+						<p:outputLabel value="#{objeto.valorVenda} R$" />
+
+						<h:outputText value="Valor da compra" />
+						<p:outputLabel value="#{objeto.valorCompra} R$" />
+
+						<h:outputText value="Estoque" />
+						<p:outputLabel value="#{objeto.quantidadeEstoque}" />
+
+						<h:outputText value="Descrição" />
+						<p:outputLabel value="#{objeto.descricao}" />
+					</p:panelGrid>
+				</p:rowExpansion>
+
+			</p:dataTable>
+		</p:dialog>
+
+
+		<p:dialog header="Itens da venda" id="carrinhoList"
+			widgetVar="carrinhoList" height="100%" resizable="false"
+			scrollable="true" scrollHeight="150">
+
+
+			<p:dataTable id="tabelaCarrinho" var="objeto"
+				value="#{vendaBean.carrinho}" rows="8" paginator="true">
+
+				<f:facet name="header">
+					<h:outputText
+						rendered="#{not empty vendaBean.clienteSelecionado.nome}"
+						value="#{vendaBean.clienteSelecionado.nome}" />
+				</f:facet>
+
+				<f:facet name="header">
+					<h:outputText value=" (Total #{vendaBean.vendaNegociada.total} R$)"
+								  rendered="#{vendaBean.vendaNegociada.total ne 0.0}"/>
+				</f:facet>
+
+				<p:column filterBy="#{objeto.nome}" headerText="Nome"
+					filterMatchMode="contains">
+					<h:outputText value="#{objeto.nome}" />
+				</p:column>
+
+
+				<p:column headerText="Quantidade" style="width:120px">
+					<h:outputText value="#{objeto.quantidadeVenda}" />
+				</p:column>
+
+				<p:column style="width:270px">
+					<p:spinner id="quantidadeProduto" value="#{vendaBean.quantidade}"
+						min="1" max="10000">
+						<p:ajax process="@this" />
+					</p:spinner>
+				</p:column>
+
+
+				<p:column style="width:50px">
+					<p:commandButton icon="fa fa-user-plus"
+						actionListener="#{vendaBean.removeProduto(objeto)}"
+						disabled="#{objeto.quantidadeVenda eq 0}" update="tabelaCarrinho"
+						process="@this">
+
+						<f:setPropertyActionListener value="#{objeto}"
+							target="#{vendaBean.produtoSelecionado}" />
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton title="Formas de pagamento" icon="fa fa-usd"
+									 oncomplete="PF('diagFormaDePagamento').show()"/>
+				</f:facet>
+
+				<f:facet name="footer">
+					<p:commandButton title="Finalizar" icon="fa fa-check"
+						disabled="#{empty vendaBean.carrinho or empty vendaBean.clienteSelecionado or vendaBean.formaSelecionada eq ''}"
+						actionListener="#{vendaBean.validaCompra}" update="formVendas"/>
+				</f:facet>
+
+				<f:facet name="footer">
+					<p:commandButton title="Cancelar" icon="fa fa-ban"
+						actionListener="#{vendaBean.cancelarCompra}"
+						disabled="#{empty vendaBean.carrinho and empty vendaBean.clienteSelecionado}"
+						update="formVendas" process="@this" />
+				</f:facet>
+
+			</p:dataTable>
+
+		</p:dialog>
+
+		<p:dialog header="formas de pagamento" widgetVar="diagFormaDePagamento"
+			modal="true">
+
+			<p:panel>
+				<h:panelGrid columns="1">
+					<p:multiSelectListbox value="#{vendaBean.formaSelecionada}"
+						effect="slide" header="Formas de pagamento" showHeaders="true">
+						<f:selectItems value="#{vendaBean.formasPagamento}" />
+					</p:multiSelectListbox>
+				</h:panelGrid>
+			</p:panel>
+		</p:dialog>
+
+		<p:dock position="bottom" >
+			<p:menuitem value="Email" icon="/restrito/images/email.png" url="https://mail.google.com/mail/u/0/#inbox"/>
+			<p:menuitem value="Vendas" icon="/restrito/images/portfolio.png" url="/restrito/vendas/vendas.xhtml"/>
+			<p:menuitem value="Produtos" icon="/restrito/images/estoque.png" url="/restrito/produtos/produtos.xhtml"/>
+			<p:menuitem value="WhatsApp" icon="/restrito/images/whatsapp.png" url="https://web.whatsapp.com"/>
+			<p:menuitem value="Messeger" icon="/restrito/images/messenger.png" url="https://www.messenger.com"/>
+
+			<p:menuitem rendered="#{vendaBean.menuVenda eq false}" value="Iniciar venda" actionListener="#{vendaBean.init}" update="formVendas" icon="/restrito/images/venda.png">
+				<f:setPropertyActionListener target="#{vendaBean.menuVenda}" value="true" />
+			</p:menuitem>
+
+			<p:menuitem rendered="#{vendaBean.menuVenda eq true}" value="Encerrar venda" actionListener="#{vendaBean.cancelarCompra}" update="formVendas" icon="/restrito/images/endVenda.png">
+				<!--<f:setPropertyActionListener target="#{vendaBean.menuVenda}" value="false" />-->
+			</p:menuitem>
+
+			<p:menuitem value="Perfil" icon="/restrito/images/man.png" url="#"/>
+			<p:menuitem value="Sair" icon="/restrito/images/logout.png" url="/logout"/>
+		</p:dock>
+
+	</h:form>
+</ui:decorate>
